@@ -17,6 +17,9 @@
       <span>{{currentBalanceInEther}}
         <i>ether</i>
       </span>
+      <br>
+      <label>Current blocknumber: </label>
+      <span>{{currentBlocknumber}}</span>
     </span>
   </div>
 </template>
@@ -36,7 +39,8 @@ export default {
       currentNetwork: '',
       currentAccount: '',
       currentBalance: '',
-      errorMsg: null
+      errorMsg: null,
+      currentBlocknumber: 0
     }
   },
   created: function () {
@@ -94,11 +98,20 @@ export default {
       });
 
 
-      var accountInterval = setInterval(function () {
+      var web3Interval = setInterval(function () {
         if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
           vm.currentAccount = web3.eth.accounts[0];
           updateCurrentAccountBalance()
         }
+
+        web3Provided.eth.getBlockNumber(function(error, result){
+          if(!error) {
+              vm.currentBlocknumber = result
+          } else {
+
+          }
+         })
+
       }, 100);
 
       function updateCurrentAccountBalance() {
