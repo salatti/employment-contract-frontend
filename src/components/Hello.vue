@@ -1,70 +1,153 @@
 <template>
   <div class="hello">
-    <label>Current address:</label>
-    <span>{{currentAddress}}</span>
+    <span v-if="show">
+      <h1>{{currentNetwork}}</h1>
+      <div v-if="errorMsg" class="alert alert-danger" role="alert">
+        {{errorMsg}}
+      </div>
+      <label>Current address:</label>
+      <span>{{currentAccount}}</span>
+      <br>
+      <label>Current balance:</label>
+      <span>{{currentBalance}}
+        <i>wei</i>
+      </span>
+      <br>
+      <label>Current balance in ether:</label>
+      <span>{{currentBalanceInEther}}
+        <i>ether</i>
+      </span>
+    </span>
   </div>
 </template>
 
 <script>
-  import Web3 from 'web3'
-  
-  var web3Provided;
-  
-  export default {
-    name: 'hello',
-    data() {
-      return {
-        currentAddress: "Loading data.." // ei päivity?
-      }
-    },
-    created: function() {
-  
-      var vm = this;
-  
-      window.addEventListener('load', function() {
-  
-  
-        if (typeof web3 !== 'undefined') {
-          web3Provided = new Web3(web3.currentProvider);
-        } else {
-          web3Provided = new Web3()
-        }
-  
-        web3Provided.eth.getAccounts(function(error, result) {
-  
-          if (!error) {
-            vm.currentAddress = result[0];
-  
-          } else {
-  
-          }
-  
-        });
-  
-      })
+import Web3 from 'web3'
+
+var web3Provided;
+
+var bigNumberBalance;
+
+export default {
+  name: 'hello',
+  data() {
+    return {
+      show: false,
+      currentNetwork: '',
+      currentAccount: '',
+      currentBalance: '',
+      errorMsg: null
     }
-  
+  },
+  created: function () {
+
+    var vm = this;
+
+    window.addEventListener('load', function () {
+
+
+      if (typeof web3 !== 'undefined') {
+        web3Provided = new Web3(web3.currentProvider);
+      } else {
+        web3Provided = new Web3()
+      }
+
+      web3Provided.version.getNetwork((err, netId) => {
+        //console.log(netId)
+        switch (netId) {
+          case "1":
+            vm.currentNetwork = 'Mainnet'
+            break
+          case "2":
+            vm.currentNetwork = 'Deprecated Morden test'
+            break
+          case "3":
+            vm.currentNetwork = 'Ropsten test network.'
+            break
+          case "4":
+            vm.currentNetwork = 'Rinkeby test network.'
+            break
+          case "42":
+            vm.currentNetwork = 'Kovan test network.'
+            break
+          default:
+            vm.currentNetwork = 'An unknown network.'
+        }
+      })
+
+      web3Provided.eth.getAccounts(function (error, result) {
+
+        if (!error) {
+          console.log("getAccounts() returned " + typeof (result))
+          console.log(result.length)
+          if (result.length > 0) {
+            vm.currentAccount = result[0]
+            updateCurrentAccountBalance();
+          } else {
+            vm.errorMsg = "Check your MetaMask login!"
+          }
+        } else {
+          console.log("error" + error)
+          vm.currentAccount = error
+        }
+
+      });
+
+
+      var accountInterval = setInterval(function () {
+        if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
+          vm.currentAccount = web3.eth.accounts[0];
+          updateCurrentAccountBalance()
+        }
+      }, 100);
+
+      function updateCurrentAccountBalance() {
+        console.log("Updating current account balance..")
+        console.log("Current account: " + vm.currentAccount)
+        web3Provided.eth.getBalance(vm.currentAccount, function (error, result) {
+          if (!error) {
+            bigNumberBalance = result
+            vm.currentBalance = result.toNumber()
+          } else {
+            vm.currentBalance = 'Error'
+          }
+        })
+
+      }
+
+
+      vm.show = true;
+    })
+
+  },
+  computed: {
+    currentBalanceInEther: function () {
+      return web3Provided.fromWei(this.currentBalance, 'ether')
+    }
   }
+
+
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  h1,
-  h2 {
-    font-weight: normal;
-  }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  li {
-    display: inline-block;
-    margin: 0 10px;
-  }
-  
-  a {
-    color: #42b983;
-  }
+h1,
+h2 {
+  font-weight: normal;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+a {
+  color: #42b983;
+}
 </style>
