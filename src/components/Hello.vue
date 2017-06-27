@@ -104,13 +104,13 @@ export default {
           updateCurrentAccountBalance()
         }
 
-        web3Provided.eth.getBlockNumber(function(error, result){
-          if(!error) {
-              vm.currentBlocknumber = result
+        web3Provided.eth.getBlockNumber(function (error, result) {
+          if (!error) {
+            vm.currentBlocknumber = result
           } else {
 
           }
-         })
+        })
 
       }, 100);
 
