@@ -1,7 +1,12 @@
 <template>
   <div id="app">
     <img src="./assets/ethereum.png">
-    <router-view></router-view>
+    <br>
+    <router-link to="/">Metamask info</router-link>
+    <router-link to="/new">Create a new contract</router-link>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 

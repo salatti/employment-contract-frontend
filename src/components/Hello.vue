@@ -98,21 +98,22 @@ export default {
       });
 
 
-      var web3Interval = setInterval(function () {
-        if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
-          vm.currentAccount = web3.eth.accounts[0];
-          updateCurrentAccountBalance()
-        }
+      // var web3Interval = setInterval(function () {
+      //   if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
+      //     vm.currentAccount = web3.eth.accounts[0];
+      //     updateCurrentAccountBalance()
+      //   }
 
-        web3Provided.eth.getBlockNumber(function (error, result) {
-          if (!error) {
-            vm.currentBlocknumber = result
-          } else {
+      //   web3Provided.eth.getBlockNumber(function (error, result) {
+      //     if (!error) {
+      //       console.log(result)
+      //       vm.currentBlocknumber = result
+      //     } else {
 
-          }
-        })
+      //     }
+      //   })
 
-      }, 100);
+      // }, 20000);
 
       function updateCurrentAccountBalance() {
         console.log("Updating current account balance..")
