@@ -44,7 +44,7 @@ export default {
         .then(function (response) {
           console.log("Response")
 
-          vm.response = response.data;
+          vm.response = response;
           console.log(response);
         })
         .catch(function (error) {

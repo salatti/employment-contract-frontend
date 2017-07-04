@@ -21,6 +21,7 @@
       <label>Current blocknumber: </label>
       <span>{{currentBlocknumber}}</span>
     </span>
+    <span v-else><br>Loading...</span>
   </div>
 </template>
 
@@ -43,41 +44,21 @@ export default {
       currentBlocknumber: 0
     }
   },
-  created: function () {
+  mounted: function () {
 
     var vm = this;
 
-    window.addEventListener('load', function () {
+    setTimeout(function () {
 
 
       if (typeof web3 !== 'undefined') {
         web3Provided = new Web3(web3.currentProvider);
+        console.log(vm.web3LoadInterval);
       } else {
         web3Provided = new Web3()
       }
 
-      web3Provided.version.getNetwork((err, netId) => {
-        //console.log(netId)
-        switch (netId) {
-          case "1":
-            vm.currentNetwork = 'Mainnet'
-            break
-          case "2":
-            vm.currentNetwork = 'Deprecated Morden test'
-            break
-          case "3":
-            vm.currentNetwork = 'Ropsten test network.'
-            break
-          case "4":
-            vm.currentNetwork = 'Rinkeby test network.'
-            break
-          case "42":
-            vm.currentNetwork = 'Kovan test network.'
-            break
-          default:
-            vm.currentNetwork = 'An unknown network.'
-        }
-      })
+
 
       web3Provided.eth.getAccounts(function (error, result) {
 
@@ -129,9 +110,31 @@ export default {
 
       }
 
+      web3Provided.version.getNetwork((err, netId) => {
+        //console.log(netId)
+        switch (netId) {
+          case "1":
+            vm.currentNetwork = 'Mainnet'
+            break
+          case "2":
+            vm.currentNetwork = 'Deprecated Morden test'
+            break
+          case "3":
+            vm.currentNetwork = 'Ropsten test network.'
+            break
+          case "4":
+            vm.currentNetwork = 'Rinkeby test network.'
+            break
+          case "42":
+            vm.currentNetwork = 'Kovan test network.'
+            break
+          default:
+            vm.currentNetwork = 'An unknown network.'
+        }
+        vm.show = true;
+      });
 
-      vm.show = true;
-    })
+    }, 1000);
 
   },
   computed: {
