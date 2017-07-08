@@ -36,7 +36,7 @@ export default {
       var vm = this;
       console.log("Sending")
       // Send
-      axios.post(`${apiConfig.getApiUrl()}/contract/new`, {
+      axios.post(`${apiConfig.getApiUrl()}/contracts`, {
         employeeName: this.employeeName,
         employeeAddr: this.employeeAddr,
         lastAccTime: this.lastAccTime

@@ -4,9 +4,10 @@
     <br>
     <router-link to="/">Metamask info</router-link>
     <router-link to="/new">Create a new contract</router-link>
-    
-      <router-view></router-view>
-    
+    <router-link to="/all">List all contracts</router-link>
+  
+    <router-view></router-view>
+  
   </div>
 </template>
 
