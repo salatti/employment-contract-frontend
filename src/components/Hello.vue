@@ -21,7 +21,8 @@
       <label>Current blocknumber: </label>
       <span>{{currentBlocknumber}}</span>
     </span>
-    <span v-else><br>Loading...</span>
+    <span v-else>
+      <br>Loading...</span>
   </div>
 </template>
 
@@ -31,6 +32,8 @@ import Web3 from 'web3'
 var web3Provided;
 
 var bigNumberBalance;
+
+var web3RequestInterval;
 
 export default {
   name: 'hello',
@@ -44,7 +47,7 @@ export default {
       currentBlocknumber: 0
     }
   },
-  mounted: function () {
+  mounted() {
 
     var vm = this;
 
@@ -53,7 +56,6 @@ export default {
 
       if (typeof web3 !== 'undefined') {
         web3Provided = new Web3(web3.currentProvider);
-        console.log(vm.web3LoadInterval);
       } else {
         web3Provided = new Web3()
       }
@@ -63,8 +65,6 @@ export default {
       web3Provided.eth.getAccounts(function (error, result) {
 
         if (!error) {
-          console.log("getAccounts() returned " + typeof (result))
-          console.log(result.length)
           if (result.length > 0) {
             vm.currentAccount = result[0]
             updateCurrentAccountBalance();
@@ -79,22 +79,23 @@ export default {
       });
 
 
-      // var web3Interval = setInterval(function () {
-      //   if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
-      //     vm.currentAccount = web3.eth.accounts[0];
-      //     updateCurrentAccountBalance()
-      //   }
+      web3RequestInterval = setInterval(function () {
 
-      //   web3Provided.eth.getBlockNumber(function (error, result) {
-      //     if (!error) {
-      //       console.log(result)
-      //       vm.currentBlocknumber = result
-      //     } else {
+        if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
+          vm.currentAccount = web3.eth.accounts[0];
+          updateCurrentAccountBalance()
+        }
 
-      //     }
-      //   })
+        web3Provided.eth.getBlockNumber(function (error, result) {
+          if (!error) {
+            console.log(result)
+            vm.currentBlocknumber = result
+          } else {
 
-      // }, 20000);
+          }
+        });
+
+      }, 2000);
 
       function updateCurrentAccountBalance() {
         console.log("Updating current account balance..")
@@ -111,7 +112,7 @@ export default {
       }
 
       web3Provided.version.getNetwork((err, netId) => {
-        //console.log(netId)
+        console.log("netid:" + netId)
         switch (netId) {
           case "1":
             vm.currentNetwork = 'Mainnet'
@@ -141,30 +142,12 @@ export default {
     currentBalanceInEther: function () {
       return web3Provided.fromWei(this.currentBalance, 'ether')
     }
+  },
+  destroyed() {
+    clearInterval(web3RequestInterval);
   }
 
 
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1,
-h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-</style>

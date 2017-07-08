@@ -20,7 +20,7 @@
 
 <script>
 import axios from 'axios';
-
+import apiConfig from '../../config/apiurls.js'
 export default {
   name: 'new',
   data() {
@@ -36,7 +36,7 @@ export default {
       var vm = this;
       console.log("Sending")
       // Send
-      axios.post('http://localhost:3000/contract/new', {
+      axios.post(`${apiConfig.getApiUrl()}/contract/new`, {
         employeeName: this.employeeName,
         employeeAddr: this.employeeAddr,
         lastAccTime: this.lastAccTime
