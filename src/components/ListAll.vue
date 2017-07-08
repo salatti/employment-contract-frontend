@@ -9,7 +9,9 @@
   
       <tr v-for="item in response">
         <th>{{ item.employee }}</th>
-        <th>{{ item.contract}} </th>
+        <th>
+          <router-link :to="{ name: 'Contract', params: { id: item.contract }}">{{ item.contract}}</router-link>
+        </th>
       </tr>
     </table>
   </div>
@@ -45,8 +47,8 @@ export default {
 </script>
 
 <style scoped>
-  table.center {
-    margin-left:auto; 
-    margin-right:auto;
-  }
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>

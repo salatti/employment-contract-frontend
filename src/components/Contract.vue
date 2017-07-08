@@ -1,25 +1,13 @@
 <template>
-  <div class="hello">
+  <div class="Contract">
     <span v-if="show">
       <h1>{{currentNetwork}}</h1>
-      <div v-if="errorMsg" class="alert alert-danger" role="alert">
-        {{errorMsg}}
-      </div>
-      <label>Current address:</label>
-      <span>{{currentAccount}}</span>
-      <br>
-      <label>Current balance:</label>
-      <span>{{currentBalance}}
-        <i>wei</i>
-      </span>
-      <br>
-      <label>Current balance in ether:</label>
-      <span>{{currentBalanceInEther}}
-        <i>ether</i>
-      </span>
-      <br>
-      <label>Current blocknumber: </label>
-      <span>{{currentBlocknumber}}</span>
+      {{errorMsg}} <br>
+      {{id}}<br>
+      {{ownerOfEmploymentContract}}<br>
+      {{name}}<br>
+      {{currentBlocktime}}<br>
+      {{acceptTimeFormatted}}
     </span>
     <span v-else>
       <br>Loading...</span>
@@ -27,23 +15,34 @@
 </template>
 
 <script>
-import Web3 from 'web3';
+import Web3 from 'web3'
+var contract = require('truffle-contract');
+var moment = require('moment');
 
-let web3Provided;
-let bigNumberBalance;
-let web3RequestInterval;
+var web3Provided;
+var provider;
+var bigNumberBalance;
+var web3RequestInterval;
+var employmentContractInstance;
+var deployedAddress;
+
+const employmentContractArtifacts = require('../../../employment-contract-backend/truffle/build/contracts/EmploymentContract.json');
 
 export default {
-  name: 'hello',
+  name: 'Contract',
+  props: ['id'],
   data() {
     return {
       show: false,
       currentNetwork: '',
-      currentAccount: '',
-      currentBalance: '',
+      //currentAccount: '',
+      //currentBalance: '',
       errorMsg: null,
-      currentBlocknumber: 0,
-    };
+      ownerOfEmploymentContract: '',
+      name: '',
+      currentBlocktime: '',
+      acceptTimeFormatted: ''
+    }
   },
   mounted() {
 
@@ -54,11 +53,12 @@ export default {
 
       if (typeof web3 !== 'undefined') {
         web3Provided = new Web3(web3.currentProvider);
+        provider = web3.currentProvider;
       } else {
-        web3Provided = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
+        const defaultProvider = new Web3.providers.HttpProvider('http://localhost:8545');
+        web3Provided = new Web3(defaultProvider)
+        provider = defaultProvider;
       }
-
-
 
       web3Provided.eth.getAccounts(function (error, result) {
 
@@ -83,15 +83,6 @@ export default {
           vm.currentAccount = web3.eth.accounts[0];
           updateCurrentAccountBalance()
         }
-
-        web3Provided.eth.getBlockNumber(function (error, result) {
-          if (!error) {
-            console.log(result)
-            vm.currentBlocknumber = result
-          } else {
-
-          }
-        });
 
       }, 2000);
 
@@ -132,6 +123,35 @@ export default {
         }
         vm.show = true;
       });
+
+      // GetContract
+      const EmploymentContract = contract(employmentContractArtifacts);
+      EmploymentContract.setProvider(provider);
+
+      console.log("Getting employment contract at" + vm.id);
+      EmploymentContract.at(vm.id)
+        .then((instance) => {
+          employmentContractInstance = instance;
+          deployedAddress = instance.address;
+          Promise.all([
+            employmentContractInstance.employeeAddr.call(),
+            employmentContractInstance.employeeName.call(),
+            employmentContractInstance.creationTime.call(),
+            employmentContractInstance.acceptTime.call()
+          ]).then(([owner, name2, creationTime, acceptTime]) => {
+            console.log("THENNN!");
+
+            vm.ownerOfEmploymentContract = owner;
+            vm.name = web3Provided.toAscii(name2);
+
+            vm.currentBlocktime = moment.unix(creationTime).format('DD/MM/YYYY HH:mm:ss');
+            vm.acceptTimeFormatted = moment.unix(acceptTime).format('DD/MM/YYYY HH:mm:ss');
+
+          });
+        })
+        .catch((error) => {
+          vm.errorMsg = error;
+        });
 
     }, 1000);
 
