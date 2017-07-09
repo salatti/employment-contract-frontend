@@ -96,7 +96,7 @@ export default {
             vm.currentBlocknumber = result;
           }
         });
-      }, 2000);
+      }, 10000);
 
       web3Provided.version.getNetwork((err, netId) => {
         console.log(`netid: ${netId}`);
