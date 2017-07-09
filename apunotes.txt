@@ -1,0 +1,19 @@
+0x8B76E5f15309DAd1bbbC398Caa0A0E557778d89F,Altti,1498770000
+
+0x8B76E5f15309DAd1bbbC398Caa0A0E557778d89F
+
+mongoid 595bbff07a90452a3ed30a56
+
+0xb531220207885a2377224ad8c6273ba376e78f1e
+
+
+
+ContractCreator.at("0x2466c0f7bedaf83c533321168514070a7a5249fa").employmentContracts.call(0x8B76E5f15309DAd1bbbC398Caa0A0E557778d89F, {from: "0x83aa04f5e45c242ce397e798765ad0672f8b768b"}); 
+ContractCreator.at("0x2466c0f7bedaf83c533321168514070a7a5249fa").employmentContracts.call("0x8B76E5f15309DAd1bbbC398Caa0A0E557778d89F"); 
+
+ContractCreator.at("0x2466c0f7bedaf83c533321168514070a7a5249fa").last.call();
+truffle(development)> ContractCreator.at("0x2466c0f7bedaf83c533321168514070a7a5249fa").last.call();
+'0x8480ccd3a5072dffb7a55f34b184a5dbe0e1c2c7'
+truffle(development)>
+
+
