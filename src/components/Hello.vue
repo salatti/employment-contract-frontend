@@ -1,8 +1,8 @@
 <template>
-  <div class="hello">
-    <span v-if="show">
+  <div class='hello'>
+    <span v-if='show'>
       <h1>{{currentNetwork}}</h1>
-      <div v-if="errorMsg" class="alert alert-danger" role="alert">
+      <div v-if='errorMsg' class='alert alert-danger' role='alert'>
         {{errorMsg}}
       </div>
       <label>Current address:</label>
@@ -30,8 +30,9 @@
 import Web3 from 'web3';
 
 let web3Provided;
-let bigNumberBalance;
+// let bigNumberBalance;
 let web3RequestInterval;
+let web3;
 
 export default {
   name: 'hello',
@@ -46,106 +47,90 @@ export default {
     };
   },
   mounted() {
+    const vm = this;
 
-    var vm = this;
-
-    setTimeout(function () {
-
-
+    setTimeout(() => {
       if (typeof web3 !== 'undefined') {
+        // Get injected web3 object
         web3Provided = new Web3(web3.currentProvider);
       } else {
-        web3Provided = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
+        web3Provided = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
       }
-
-
-
-      web3Provided.eth.getAccounts(function (error, result) {
-
-        if (!error) {
-          if (result.length > 0) {
-            vm.currentAccount = result[0]
-            updateCurrentAccountBalance();
-          } else {
-            vm.errorMsg = "Check your MetaMask login!"
-          }
-        } else {
-          console.log("error" + error)
-          vm.currentAccount = error
-        }
-
-      });
-
-
-      web3RequestInterval = setInterval(function () {
-
-        if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
-          vm.currentAccount = web3.eth.accounts[0];
-          updateCurrentAccountBalance()
-        }
-
-        web3Provided.eth.getBlockNumber(function (error, result) {
-          if (!error) {
-            console.log(result)
-            vm.currentBlocknumber = result
-          } else {
-
-          }
-        });
-
-      }, 2000);
 
       function updateCurrentAccountBalance() {
-        console.log("Updating current account balance..")
-        console.log("Current account: " + vm.currentAccount)
-        web3Provided.eth.getBalance(vm.currentAccount, function (error, result) {
+        console.log('Updating current account balance..');
+        console.log(`Current account: ${vm.currentAccount}`);
+        web3Provided.eth.getBalance(vm.currentAccount, (error, result) => {
           if (!error) {
-            bigNumberBalance = result
-            vm.currentBalance = result.toNumber()
+            vm.bigNumberBalance = result;
+            vm.currentBalance = result.toNumber();
           } else {
-            vm.currentBalance = 'Error'
+            vm.currentBalance = 'Error';
           }
-        })
-
+        });
       }
 
+      web3Provided.eth.getAccounts((error, result) => {
+        if (!error) {
+          if (result.length > 0) {
+            vm.currentAccount = result[0];
+            updateCurrentAccountBalance();
+          } else {
+            vm.errorMsg = 'Check your MetaMask login!';
+          }
+        } else {
+          console.log(`error: ${error}`);
+          vm.currentAccount = error;
+        }
+      });
+
+      web3RequestInterval = setInterval(() => {
+        if (web3Provided.eth.accounts[0] !== vm.currentAccount) {
+          vm.currentAccount = web3.eth.accounts[0];
+          this.updateCurrentAccountBalance();
+        }
+
+        web3Provided.eth.getBlockNumber((error, result) => {
+          if (!error) {
+            console.log(result);
+            vm.currentBlocknumber = result;
+          }
+        });
+      }, 2000);
+
       web3Provided.version.getNetwork((err, netId) => {
-        console.log("netid:" + netId)
+        console.log(`netid: ${netId}`);
         switch (netId) {
-          case "1":
-            vm.currentNetwork = 'Mainnet'
-            break
-          case "2":
-            vm.currentNetwork = 'Deprecated Morden test'
-            break
-          case "3":
-            vm.currentNetwork = 'Ropsten test network.'
-            break
-          case "4":
-            vm.currentNetwork = 'Rinkeby test network.'
-            break
-          case "42":
-            vm.currentNetwork = 'Kovan test network.'
-            break
+          case '1':
+            vm.currentNetwork = 'Mainnet';
+            break;
+          case '2':
+            vm.currentNetwork = 'Deprecated Morden test';
+            break;
+          case '3':
+            vm.currentNetwork = 'Ropsten test network.';
+            break;
+          case '4':
+            vm.currentNetwork = 'Rinkeby test network.';
+            break;
+          case '42':
+            vm.currentNetwork = 'Kovan test network.';
+            break;
           default:
-            vm.currentNetwork = 'An unknown network.'
+            vm.currentNetwork = 'An unknown network.';
         }
         vm.show = true;
       });
-
     }, 1000);
-
   },
   computed: {
-    currentBalanceInEther: function () {
-      return web3Provided.fromWei(this.currentBalance, 'ether')
-    }
+    currentBalanceInEther() {
+      return web3Provided.fromWei(this.currentBalance, 'ether');
+    },
   },
   destroyed() {
     clearInterval(web3RequestInterval);
-  }
-
-
-}
+  },
+};
 </script>
 
