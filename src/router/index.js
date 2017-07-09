@@ -1,10 +1,11 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Hello from '@/components/Hello'
-import New from '@/components/New'
-import ListAll from '@/components/ListAll'
-import Contract from '@/components/Contract'
-Vue.use(Router)
+import Vue from 'vue';
+import Router from 'vue-router';
+import Hello from '@/components/Hello';
+import New from '@/components/New';
+import ListAll from '@/components/ListAll';
+import Contract from '@/components/Contract';
+
+Vue.use(Router);
 
 export default new Router({
   routes: [

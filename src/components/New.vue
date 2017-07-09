@@ -12,7 +12,7 @@
     <br>
     <button v-on:click="send">Send</button>
   
-    <li v-for="item in response">
+    <li v-for="item in response" v-bind:key="item">
       {{ item }}
     </li>
   </div>
@@ -20,40 +20,38 @@
 
 <script>
 import axios from 'axios';
-import apiConfig from '../../config/apiurls.js'
+import apiConfig from '../../config/apiurls';
+
 export default {
   name: 'new',
   data() {
     return {
-      employeeName: "",
-      employeeAddr: "",
-      lastAccTime: "",
-      response: ""
-    }
+      employeeName: '',
+      employeeAddr: '',
+      lastAccTime: '',
+      response: '',
+    };
   },
   methods: {
     send() {
-      var vm = this;
-      console.log("Sending")
+      const vm = this;
+      console.log('Sending');
       // Send
       axios.post(`${apiConfig.getApiUrl()}/contracts`, {
         employeeName: this.employeeName,
         employeeAddr: this.employeeAddr,
-        lastAccTime: this.lastAccTime
+        lastAccTime: this.lastAccTime,
       })
-        .then(function (response) {
-          console.log("Response")
-
+        .then((response) => {
+          console.log('Response');
           vm.response = response;
           console.log(response);
         })
-        .catch(function (error) {
-          console.log("Error")
-
+        .catch((error) => {
+          console.log('Error');
           console.log(error);
         });
-
-    }
-  }
-}
+    },
+  },
+};
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <div class='hello'>
-    <span v-if='show'>
+  <div class="hello">
+    <span v-if="show">
       <h1>{{currentNetwork}}</h1>
-      <div v-if='errorMsg' class='alert alert-danger' role='alert'>
+      <div v-if="errorMsg" class="alert alert-danger" role="alert">
         {{errorMsg}}
       </div>
       <label>Current address:</label>

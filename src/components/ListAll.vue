@@ -7,7 +7,7 @@
         <th>Contract address</th>
       </tr>
   
-      <tr v-for="item in response">
+      <tr li v-for="item in response" v-bind:key="item">
         <th>{{ item.employee }}</th>
         <th>
           <router-link :to="{ name: 'Contract', params: { id: item.contract }}">{{ item.contract}}</router-link>
@@ -19,31 +19,30 @@
 
 <script>
 import axios from 'axios';
-import apiConfig from '../../config/apiurls.js'
+import apiConfig from '../../config/apiurls';
+
 export default {
   name: 'listAll',
   data() {
     return {
-      response: ""
-    }
+      response: '',
+    };
   },
   mounted() {
     console.log('Getting all');
-    let vm = this;
+    const vm = this;
     axios.get(`${apiConfig.getApiUrl()}/contracts`)
-      .then(function (response) {
-        console.log("Response")
-
+      .then((response) => {
+        console.log('Response');
         vm.response = response.data;
         console.log(response);
       })
-      .catch(function (error) {
-        console.log("Error")
-
+      .catch((error) => {
+        console.log('Error');
         console.log(error);
       });
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
