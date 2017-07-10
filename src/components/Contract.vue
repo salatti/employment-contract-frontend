@@ -1,13 +1,32 @@
 <template>
   <div class="Contract">
     <span v-if="show">
-      <h1>{{currentNetwork}}</h1>
-      {{errorMsg}}
-      <br> {{id}}
-      <br> {{ownerOfEmploymentContract}}
-      <br> {{name}}
-      <br> {{currentBlocktime}}
-      <br> {{acceptTimeFormatted}}
+      <p class="bg-danger">{{errorMsg}}</p>
+      <div class="row">
+        <div class="col-md-6 text-left">
+          <h2>Network</h2>
+          <label>Current network:</label> {{currentNetwork}}
+          <br>
+          <label>Current provider:</label> {{currentProvider}}
+          <br>
+          <label>Current account:</label> {{currentAccount}}
+          <br>
+        </div>
+        <div class="col-md-6 text-left">
+          <h2>Emplyoment Contract</h2>
+          <label>Contract address:</label> {{id}}
+          <br>
+          <h3>Data</h3>
+          <label>Employee address:</label> {{dataEmployee}}
+          <br>
+          <label>Employee name:</label> {{name}}
+          <br>
+          <label>Contract created:</label> {{creationTime}}
+          <br>
+          <label>Contract accepted:</label> {{acceptTime}}
+          <br>
+        </div>
+      </div>
     </span>
     <span v-else>
       <br>Loading...</span>
@@ -15,6 +34,7 @@
 </template>
 
 <script>
+/* global web3 */
 import Web3 from 'web3';
 
 const contract = require('truffle-contract');
@@ -25,7 +45,6 @@ let web3Provided;
 let provider;
 let web3RequestInterval;
 let employmentContractInstance;
-let web3;
 
 export default {
   name: 'Contract',
@@ -34,13 +53,14 @@ export default {
     return {
       show: false,
       currentNetwork: '',
-      // currentAccount: '',
+      currentAccount: '',
       // currentBalance: '',
+      currentProvider: '',
       errorMsg: null,
-      ownerOfEmploymentContract: '',
+      dataEmployee: '',
       name: '',
-      currentBlocktime: '',
-      acceptTimeFormatted: '',
+      creationTime: '',
+      acceptTime: '',
     };
   },
   mounted() {
@@ -50,15 +70,15 @@ export default {
       if (typeof web3 !== 'undefined') {
         web3Provided = new Web3(web3.currentProvider);
         provider = web3.currentProvider;
+        vm.currentProvider = 'Metamask';
       } else {
         const defaultProvider = new Web3.providers.HttpProvider('http://localhost:8545');
         web3Provided = new Web3(defaultProvider);
         provider = defaultProvider;
+        vm.currentProvider = 'TestRPC';
       }
 
       function updateCurrentAccountBalance() {
-        console.log('Updating current account balance..');
-        console.log(`Current account: ${vm.currentAccount}`);
         web3Provided.eth.getBalance(vm.currentAccount, (error, result) => {
           if (!error) {
             vm.currentBalance = result.toNumber();
@@ -77,8 +97,7 @@ export default {
             vm.errorMsg = 'Check your MetaMask login!';
           }
         } else {
-          console.log(`error ${error}`);
-          vm.currentAccount = error;
+          vm.errorMsg = error;
         }
       });
 
@@ -90,7 +109,7 @@ export default {
       }, 2000);
 
       web3Provided.version.getNetwork((err, netId) => {
-        console.log(`netid: ${netId}`);
+        // console.log(`netid: ${netId}`);
         switch (netId) {
           case '1':
             vm.currentNetwork = 'Mainnet';
@@ -117,7 +136,7 @@ export default {
       const EmploymentContract = contract(employmentContractArtifacts);
       EmploymentContract.setProvider(provider);
 
-      console.log(`Getting employment contract at ${vm.id}`);
+      // console.log(`Getting employment contract at ${vm.id}`);
       EmploymentContract.at(vm.id)
         .then((instance) => {
           employmentContractInstance = instance;
@@ -126,14 +145,15 @@ export default {
             employmentContractInstance.employeeName.call(),
             employmentContractInstance.creationTime.call(),
             employmentContractInstance.acceptTime.call(),
-          ]).then(([owner, name2, creationTime, acceptTime]) => {
-            console.log('THENNN!');
-
-            vm.ownerOfEmploymentContract = owner;
-            vm.name = web3Provided.toAscii(name2);
-
-            vm.currentBlocktime = moment.unix(creationTime).format('DD/MM/YYYY HH:mm:ss');
-            vm.acceptTimeFormatted = moment.unix(acceptTime).format('DD/MM/YYYY HH:mm:ss');
+          ]).then(([employeeAddr, name, creationTimeUnix, acceptTimeUnix]) => {
+            vm.dataEmployee = employeeAddr;
+            vm.name = web3Provided.toAscii(name);
+            vm.creationTime = moment.unix(creationTimeUnix).format('DD/MM/YYYY HH:mm:ss');
+            if (acceptTimeUnix.toNumber() === 0) {
+              vm.acceptTime = 'False';
+            } else {
+              vm.acceptTime = moment.unix(acceptTimeUnix).format('DD/MM/YYYY HH:mm:ss');
+            }
           });
         })
         .catch((error) => {
