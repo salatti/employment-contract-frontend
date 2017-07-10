@@ -19,12 +19,14 @@
           <h3>Data</h3>
           <label>Employee address:</label> {{dataEmployee}}
           <br>
-          <label>Employee name:</label> {{name}}
+          <label>Employee name:</label> {{dataName}}
           <br>
-          <label>Contract created:</label> {{creationTime}}
+          <label>Contract created:</label> {{dataCreationTime}}
           <br>
-          <label>Contract accepted:</label> {{acceptTime}}
+          <label>Contract accepted:</label> {{dataAcceptTime}}
           <br>
+  
+          <button v-on:click="accept" v-bind:disabled="isAcceptedDisabled" class="btn btn-primary">Accept</button>
         </div>
       </div>
     </span>
@@ -54,14 +56,36 @@ export default {
       show: false,
       currentNetwork: '',
       currentAccount: '',
-      // currentBalance: '',
       currentProvider: '',
       errorMsg: null,
       dataEmployee: '',
-      name: '',
-      creationTime: '',
-      acceptTime: '',
+      dataName: '',
+      dataCreationTime: '',
+      dataAcceptTime: '',
+      isAcceptedDisabled: true,
     };
+  },
+  methods: {
+    accept() {
+      // GetContract
+      const EmploymentContract = contract(employmentContractArtifacts);
+      EmploymentContract.setProvider(provider);
+      console.log('Get contract');
+      EmploymentContract.at(this.id)
+        .then((instance) => {
+          console.log('Got the contract');
+          employmentContractInstance = instance;
+          console.log('Making trasaction');
+          Promise.all([
+            employmentContractInstance.acceptContract({ from: this.currentAccount }),
+          ]).then(([result]) => {
+            console.log(result);
+          });
+        })
+        .catch((error) => {
+          this.errorMsg = error;
+        });
+    },
   },
   mounted() {
     const vm = this;
@@ -106,7 +130,10 @@ export default {
           vm.currentAccount = web3.eth.accounts[0];
           updateCurrentAccountBalance();
         }
-      }, 2000);
+        if (vm.currentAccount === vm.dataEmployee && vm.dataAcceptTime === 'False') {
+          vm.isAcceptedDisabled = false;
+        }
+      }, 1000);
 
       web3Provided.version.getNetwork((err, netId) => {
         // console.log(`netid: ${netId}`);
@@ -147,12 +174,12 @@ export default {
             employmentContractInstance.acceptTime.call(),
           ]).then(([employeeAddr, name, creationTimeUnix, acceptTimeUnix]) => {
             vm.dataEmployee = employeeAddr;
-            vm.name = web3Provided.toAscii(name);
-            vm.creationTime = moment.unix(creationTimeUnix).format('DD/MM/YYYY HH:mm:ss');
+            vm.dataName = web3Provided.toAscii(name);
+            vm.dataCreationTime = moment.unix(creationTimeUnix).format('DD/MM/YYYY HH:mm:ss');
             if (acceptTimeUnix.toNumber() === 0) {
-              vm.acceptTime = 'False';
+              vm.dataAcceptTime = 'False';
             } else {
-              vm.acceptTime = moment.unix(acceptTimeUnix).format('DD/MM/YYYY HH:mm:ss');
+              vm.dataAcceptTime = moment.unix(acceptTimeUnix).format('DD/MM/YYYY HH:mm:ss');
             }
           });
         })
