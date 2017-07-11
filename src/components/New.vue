@@ -12,9 +12,6 @@
     <br>
     <button v-on:click="send">Send</button>
   
-    <li v-for="item in response" v-bind:key="item">
-      {{ item }}
-    </li>
   </div>
 </template>
 
@@ -29,26 +26,20 @@ export default {
       employeeName: '',
       employeeAddr: '',
       lastAccTime: '',
-      response: '',
     };
   },
   methods: {
     send() {
-      const vm = this;
-      console.log('Sending');
-      // Send
       axios.post(`${apiConfig.getApiUrl()}/contracts`, {
         employeeName: this.employeeName,
         employeeAddr: this.employeeAddr,
         lastAccTime: this.lastAccTime,
       })
         .then((response) => {
-          console.log('Response');
-          vm.response = response;
-          console.log(response);
+          const newContractId = response.data.address;
+          this.$router.push({ name: 'Contract', params: { id: newContractId } });
         })
         .catch((error) => {
-          console.log('Error');
           console.log(error);
         });
     },
