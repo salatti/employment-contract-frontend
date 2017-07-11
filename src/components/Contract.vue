@@ -23,10 +23,16 @@
           <br>
           <label>Contract created:</label> {{dataCreationTime}}
           <br>
-          <label>Contract accepted:</label> {{dataAcceptTime}}
+          <label>Acceptance deadline:</label> {{dataDeadline}}
           <br>
+          <label>Contract accepted:</label> {{dataIsAccapted.toString()}}
+          <br>
+          <span v-if="dataAcceptTime">
+            <label>Acceptance time:</label> {{dataAcceptTime}}
+            <br>
+          </span>
   
-          <button v-on:click="accept" v-bind:disabled="isAcceptedDisabled" class="btn btn-primary">Accept</button>
+          <button v-on:click="accept" v-bind:disabled="disableAcceptButton" class="btn btn-primary">Accept</button>
         </div>
       </div>
     </span>
@@ -54,15 +60,17 @@ export default {
   data() {
     return {
       show: false,
-      currentNetwork: '',
-      currentAccount: '',
-      currentProvider: '',
+      currentNetwork: null,
+      currentAccount: null,
+      currentProvider: null,
       errorMsg: null,
-      dataEmployee: '',
-      dataName: '',
-      dataCreationTime: '',
-      dataAcceptTime: '',
-      isAcceptedDisabled: true,
+      dataEmployee: null,
+      dataName: null,
+      dataCreationTime: null,
+      dataAcceptTime: null,
+      dataDeadline: null,
+      dataIsAccapted: {},
+      disableAcceptButton: true,
     };
   },
   methods: {
@@ -76,10 +84,13 @@ export default {
           console.log('Got the contract');
           employmentContractInstance = instance;
           console.log('Making trasaction');
+          console.log(this.currentAccount);
           Promise.all([
             employmentContractInstance.acceptContract({ from: this.currentAccount }),
           ]).then(([result]) => {
             console.log(result);
+            // Force page reload
+            location.reload(true);
           });
         })
         .catch((error) => {
@@ -130,8 +141,8 @@ export default {
           vm.currentAccount = web3.eth.accounts[0];
           updateCurrentAccountBalance();
         }
-        if (vm.currentAccount === vm.dataEmployee && vm.dataAcceptTime === 'False') {
-          vm.isAcceptedDisabled = false;
+        if (vm.currentAccount === vm.dataEmployee && !vm.dataIsAccapted) {
+          vm.disableAcceptButton = false;
         }
       }, 1000);
 
@@ -172,15 +183,18 @@ export default {
             employmentContractInstance.employeeName.call(),
             employmentContractInstance.creationTime.call(),
             employmentContractInstance.acceptTime.call(),
-          ]).then(([employeeAddr, name, creationTimeUnix, acceptTimeUnix]) => {
+            employmentContractInstance.acceptanceDeadline.call(),
+            employmentContractInstance.isContractAccepted.call(),
+          ]).then(([employeeAddr, name, creationTimeUnix, acceptTimeUnix,
+            deadlineUnix, isAccepted]) => {
             vm.dataEmployee = employeeAddr;
             vm.dataName = web3Provided.toAscii(name);
             vm.dataCreationTime = moment.unix(creationTimeUnix).format('DD/MM/YYYY HH:mm:ss');
-            if (acceptTimeUnix.toNumber() === 0) {
-              vm.dataAcceptTime = 'False';
-            } else {
+            if (acceptTimeUnix.toNumber() !== 0) {
               vm.dataAcceptTime = moment.unix(acceptTimeUnix).format('DD/MM/YYYY HH:mm:ss');
             }
+            vm.dataDeadline = moment.unix(deadlineUnix).format('DD/MM/YYYY HH:mm:ss');
+            vm.dataIsAccapted = isAccepted;
           });
         })
         .catch((error) => {
