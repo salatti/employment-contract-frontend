@@ -27,12 +27,11 @@
 </template>
 
 <script>
+/* global web3:true */
 import Web3 from 'web3';
 
 let web3Provided;
-// let bigNumberBalance;
 let web3RequestInterval;
-let web3;
 
 export default {
   name: 'hello',
